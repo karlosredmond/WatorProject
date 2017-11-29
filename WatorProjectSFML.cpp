@@ -1,15 +1,16 @@
-/** Copyright 2017 Karl Redmond, Ger Dobbs
- *ProducerConsumerMain.cpp
- *Author: 	Karl Redmond, Ger Dobbs
- *Date:   	Thursday,  27 November 2017.
- *License:	GNU General Public License v3.0
- *Brief:	Joint 4th Year Wator simulation Project
-**/
-
+/* Copyright 2017 Karl Redmond
+   WatorProjectSFML.cpp
+   Author: Karl Redmond 
+   Date:   Wednesday, 29 November 2017.
+   License:GNU General Public License v3.0
+   Brief:This is a test */
+#include <SFML/Graphics.hpp>
 #include <iostream>
 #include <random>
-#include <chrono>
 #include <thread>
+#include <chrono>
+#include <string>
+
 
 int const OCEANSIZEX = 10;
 int const OCEANSIZEY = 10;
@@ -21,11 +22,7 @@ int sharkStarveTime = 4;
 char ocean[OCEANSIZEX][OCEANSIZEY][3];
 int xPos, yPos;
 
-/**
- * \brief Initialize 3 Dimensional Cube. The first layer [0] represents what will be displayed.
- * The second layer [1] represents the breed time for the fish and sharks that exist in layer [0].
- * The third layer[2] represents the starve time for the sharks that exist in layer[0].
- */
+
 void initOceanCube() {
         for (int i = 0; i < OCEANSIZEX; ++i) {
             for (int j = 0; j < OCEANSIZEY; ++j) {
@@ -36,10 +33,6 @@ void initOceanCube() {
         }
 }
 
-/**
- * \brief Populate our cube with fish placed at random positions within the first layer,
- * and set the corresponding second layer to the breed time of the fish.
- */
 void fillOceanCubeWithFish() {
         for (int i = 0; i < numFish; ++i) {
             xPos = (int) random() % 10;
@@ -49,10 +42,6 @@ void fillOceanCubeWithFish() {
         }
 }
 
-/**
- * \brief Populate our cube with sharks placed at random positions within the first layer,
- * and set the corresponding second and third layer to the breed time of the shark, and the starve time of the shark respectively.
- */
 void fillOceanCubeWithShark() {
         for (int i = 0; i < numShark; ++i) {
             xPos = std::rand() % 10;
@@ -63,18 +52,12 @@ void fillOceanCubeWithShark() {
         }
 }
 
-/**
- * \brief Initializes ocean with ' ' characters, subsequently populating the ocean with fish and sharks, and storing the breed/starve time.
- */
 void fillOcean() {
     initOceanCube();
     fillOceanCubeWithFish();
     fillOceanCubeWithShark();
 }
 
-/**
- * \brief Displays the first layer of the ocean, showing the positions of the fish and sharks.
- */
 void displayOcean() {
     for (int i = 0; i < OCEANSIZEX; ++i) {
         for (int j = 0; j < OCEANSIZEY; ++j) {
@@ -84,9 +67,6 @@ void displayOcean() {
     }
 }
 
-/**
- * \brief Helper methods to aid in visualisation of breed times
- */
 void displayBreedTimes() {
     for (int i = 0; i < OCEANSIZEX; ++i) {
         for (int j = 0; j < OCEANSIZEY; ++j) {
@@ -96,9 +76,6 @@ void displayBreedTimes() {
     }
 }
 
-/**
- * \brief Helper methods to aid in visualisation of shark starve times
- */
 void displayStarveTimes() {
     for (int i = 0; i < OCEANSIZEX; ++i) {
         for (int j = 0; j < OCEANSIZEY; ++j) {
@@ -107,20 +84,27 @@ void displayStarveTimes() {
         std::cout << std::endl;
     }
 }
-
 int main() {
+    std::string display = "Test";
+    sf::RenderWindow window(sf::VideoMode(1000, 1000), "SFML works!");
+    sf::Font font;
+    font.loadFromFile("/usr/share/fonts/truetype/fonts-japanese-gothic.ttf");
+
+    sf::Text text(display, font, 11);
+    text.setCharacterSize(32);
+    text.setPosition(50, 50);
     fillOcean();
-    // std::cout << std::endl;
-    // displayBreedTimes();
-    // std::cout << std::endl;
-    // displayStarveTimes();
-    int n = 0;
-    while (n != 10) {
-          displayOcean();
-          system("clear");
-          n++;
-          std::this_thread::sleep_for(std::chrono::milliseconds
-                                      (std::rand()%1000));
+
+    while (window.isOpen()) {
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed)
+                window.close();
+        }
+
+        window.clear();
+        //window.draw(text);
+        window.display();
     }
 
     return 0;

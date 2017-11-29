@@ -3,17 +3,20 @@
 #Used to contain commands to compile project
 #added -I. to look for any header files with the same .cpp name
 
-EXE = watorMain
+EXE = watorMainSFML
 CC = g++
 CFLAGS = -std=c++11 -pthread -I.
-CFILES = WatorProject.o
+CFILES = WatorProjectSFML.o
 
 #This rule says that each .o file depends on a .cpp file of the same name
 %.o: %.cpp
 	$(CC) -c -o $@ $< $(CFLAGS) $(DEBUGFLAGS)
 
 ALL: $(CFILES)
-	$(CC) $(CFILES) $(CFLAGS) -o $(EXE) $(DEBUGFLAGS)
+	$(CC) $(CFILES) $(CFLAGS) -o $(EXE) $(SFML) $(DEBUGFLAGS)
+
+SFML: SFML = -lsfml-graphics -lsfml-window -lsfml-system
+SFML: ALL
 
 DEBUG: DEBUGFLAGS = -g -O0
 DEBUG: ALL
