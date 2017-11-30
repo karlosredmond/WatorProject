@@ -7,10 +7,10 @@
 
 
 
-int const OCEANSIZEX = 100;
-int const OCEANSIZEY = 100;
-int numFish = 0;
-int numShark = 10;
+int const OCEANSIZEX = 10;
+int const OCEANSIZEY = 10;
+int numFish = 10;
+int numShark = 0;
 int fishBreedTime = 3;
 int sharkBreedTime = 8;
 int sharkStarveTime = 4;
@@ -76,14 +76,12 @@ std::string displayOcean(/*char ocean[OCEANSIZEX][OCEANSIZEY][3]*/) {
     std::string temp = "";
     for (int i = 0; i < OCEANSIZEX; ++i) {
         for (int j = 0; j < OCEANSIZEY; ++j) {
-            temp = temp + ocean[i][j][STARVELAYER];
+            temp = temp + ocean[i][j][BREEDLAYER];
         }
         temp = temp + "\n";
     }
     return temp;
 }
-
-
 
 void displayBreedTimes() {
     for (int i = 0; i < OCEANSIZEX; ++i) {
@@ -103,89 +101,80 @@ void displayStarveTimes() {
     }
 }
 
-char checkNeighbourhood(int x, int y){
+char checkNeighbourhood(int i, int j){
     neighbourhood.clear();
-    if(ocean[x - 1][y][0] == ' '){
+    if(ocean[(i + OCEANSIZEX -1) % OCEANSIZEX][j][0] == ' '){
         neighbourhood.push_back('N');
     }
-    if(ocean[x + 1][y][0] == ' '){
+    if(ocean[(i + 1) % OCEANSIZEY][j][0] == ' '){
         neighbourhood.push_back('S');
     }
-    if(ocean[x][y + 1][0] == ' '){
+    if(ocean[i][(j + 1) % OCEANSIZEY][0] == ' '){
         neighbourhood.push_back('E');
     }
-    if(ocean[x][y -1][0] == ' '){
+    if(ocean[i][(j + OCEANSIZEX -1) % OCEANSIZEX][0] == ' '){
         neighbourhood.push_back('W');
     }
-    std::cout << neighbourhood.size();
-    int direction = (int) random() % neighbourhood.size() ;
+    //std::cout << neighbourhood.size();
 
     //std::cout << neighbourhood[direction];
     //std::cout << direction;
-    if(neighbourhood.size() == 0){
+    if(neighbourhood.empty()){
         return 'D';
     }
     else{
+        int direction = (int) random() % (neighbourhood.size() - 1) ;
         return neighbourhood[direction] ;
     }
-
 }
-
 
 void move(){
     int direction;
     for (int i = 0; i < OCEANSIZEX; ++i) {
         for (int j = 0; j < OCEANSIZEY; ++j) {
             if (ocean[i][j][0] == 'F'){
+                ocean[i][j][1]--;   //Found a fish so decrementing breed time
                 direction = checkNeighbourhood(i,j);
                 if(direction == 'N'){
-                    ocean[i][j][1]--;                    //Found a fish so decrementing breed time
-                    oceanCopy[(i % OCEANSIZEX) - 1][j][0] = 'F';          //
+                    oceanCopy[(i + OCEANSIZEX -1) % OCEANSIZEX][j][0] = 'F';
                     oceanCopy[i][j][0] = ' ';
-                    oceanCopy[(i % OCEANSIZEX) - 1][j][1] = ocean[i][j][1]; //copying instance of fish breed time to ocean copy's relative layer
+                    oceanCopy[(i + OCEANSIZEX -1) % OCEANSIZEX][j][1] = ocean[i][j][1]; //copying instance of fish breed time to ocean copy's relative layer
                     oceanCopy[i][j][1] = ' ';
+
                 }
                 else if(direction == 'S'){
-                    ocean[i][j][1]--;                    //Found a fish so decrementing breed time
-                    oceanCopy[(i + 1) % OCEANSIZEX][j][0] = 'F';          //
+                    oceanCopy[(i + 1) % OCEANSIZEY][j][0] = 'F';
                     oceanCopy[i][j][0] = ' ';
-                    oceanCopy[(i + 1) % OCEANSIZEX][j][1] = ocean[i][j][1]; //copying instance of fish breed time to ocean copy's relative layer
+                    oceanCopy[(i + 1) % OCEANSIZEY][j][1] = ocean[i][j][1]; //copying instance of fish breed time to ocean copy's relative layer
                     oceanCopy[i][j][1] = ' ';
                 }
                 else if(direction == 'E'){
-                    ocean[i][j][1]--;                    //Found a fish so decrementing breed time
                     oceanCopy[i][(j + 1) % OCEANSIZEX][0] = 'F';          //
                     oceanCopy[i][j][0] = ' ';
                     oceanCopy[i][(j + 1) % OCEANSIZEX][1] = ocean[i][j][1]; //copying instance of fish breed time to ocean copy's relative layer
                     oceanCopy[i][j][1] = ' ';
                 }
                 else if (direction == 'W'){
-                    ocean[i][j][1]--;                    //Found a fish so decrementing breed time
-                    oceanCopy[i][(j % OCEANSIZEX) - 1][0] = 'F';          //
+                    oceanCopy[i][(j + OCEANSIZEX -1) % OCEANSIZEX][0] = 'F';
                     oceanCopy[i][j][0] = ' ';
-                    oceanCopy[i][(j % OCEANSIZEX) - 1][1] = ocean[i][j][1]; //copying instance of fish breed time to ocean copy's relative layer
+                    oceanCopy[i][(j + OCEANSIZEX - 1) % OCEANSIZEX][1] = ocean[i][j][1]; //copying instance of fish breed time to ocean copy's relative layer
                     oceanCopy[i][j][1] = ' ';
+
                 }
-                /*ocean[i][j][1]--;                    //Found a fish so decrementing breed time
-                oceanCopy[i][j + 1][0] = 'F';          //
-                oceanCopy[i][j][0] = ' ';
-                oceanCopy[i][j+1][1] = ocean[i][j][1]; //copying instance of fish breed time to ocean copy's relative layer
-                oceanCopy[i][j][1] = ' ';*/
             }
         }
     }
     copyOcean(oceanCopy, ocean);
 }
 
-
 int main() {
     std::string display = "Test";
-    sf::RenderWindow window(sf::VideoMode(2000, 2000), "SFML works!");
+    sf::RenderWindow window(sf::VideoMode(1500, 1500), "SFML works!");
     sf::Font font;
     font.loadFromFile("/Library/Fonts/AppleMyungjo.ttf");
     sf::Text text(display, font, 11);
-    text.setCharacterSize(32);
-    text.setPosition(50, 50);
+    text.setCharacterSize(20);
+    text.setPosition(0, 0);
     fillOcean();
     //std::cout << displayOcean();
     //move();
@@ -202,7 +191,7 @@ int main() {
         window.clear();
         window.draw(text);
         window.display();
-        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
         move();
         display = displayOcean();
     }
