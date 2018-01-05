@@ -12,15 +12,15 @@
 #include <boost/random.hpp>
 #include <boost/generator_iterator.hpp>
 
-int const OCEANSIZEX = 10;
-int const OCEANSIZEY = 10;
-int numFish = 0;
-int numShark = 1;
-char const FISHY = 'F';
-char const SHARKY = 'S';
-int fishBreedTime = 4;
-int sharkBreedTime = 20;
-int sharkStarveTime = 7;
+int const OCEANSIZEX = 100;
+int const OCEANSIZEY = 100;
+int numFish = 500;
+int numShark = 40;
+char const FISHY = '.';
+char const SHARKY = '0';
+int fishBreedTime = 3;
+int sharkBreedTime = 3;
+int sharkStarveTime = 3;
 char ocean[OCEANSIZEX][OCEANSIZEY][3];
 char oceanCopy[OCEANSIZEX][OCEANSIZEY][3];
 int xPos, yPos;
@@ -111,6 +111,20 @@ std::string displayOcean() {
         }
         temp += "\n";
     }
+    temp += "\n\n";
+    for (int i = 0; i < OCEANSIZEX; ++i) {
+        for (int j = 0; j < OCEANSIZEY; ++j) {
+            temp += ocean[i][j][BREEDLAYER];
+        }
+        temp += "\n";
+    }
+    temp += "\n\n";
+    for (int i = 0; i < OCEANSIZEX; ++i) {
+        for (int j = 0; j < OCEANSIZEY; ++j) {
+            temp += ocean[i][j][STARVELAYER];
+        }
+        temp += "\n";
+    }
     return temp;
 }
 
@@ -124,54 +138,65 @@ void removeShark(int i, int j){
     numShark--;
 }
 
-void removeFish(int i, int j){
-    oceanCopy[i][j][0] = SHARKY;
-    oceanCopy[i][j][1] = '0' + sharkBreedTime;
-    oceanCopy[i][j][2] = '0' + sharkStarveTime;
-    ocean[i][j][0] = ' ';
-    ocean[i][j][1] = ' ';
-    ocean[i][j][2] = ' ';
-    removeShark(i,j);
-    numFish--;
+char eatFish(int i, int j, char biatch){
+    if(biatch == 'N'){
+        oceanCopy[(i + OCEANSIZEX - 1) % OCEANSIZEX][j][0] = SHARKY;
+        oceanCopy[(i + OCEANSIZEX - 1) % OCEANSIZEX][j][1] = ocean[i][j][1];
+        oceanCopy[(i + OCEANSIZEX - 1) % OCEANSIZEX][j][2] = '0' + sharkStarveTime;
+    }
+    else if(biatch == 'S') {
+        oceanCopy[(i + 1) % OCEANSIZEY][j][0] = SHARKY;
+        oceanCopy[(i + 1) % OCEANSIZEY][j][1] = ocean[i][j][1];
+        oceanCopy[(i + 1) % OCEANSIZEY][j][2] = '0' + sharkStarveTime;
+    }
+    else if(biatch == 'E'){
+        oceanCopy[i][(j + 1) % OCEANSIZEY][0] = SHARKY;
+        oceanCopy[i][(j + 1) % OCEANSIZEY][1] = ocean[i][j][1];
+        oceanCopy[i][(j + 1) % OCEANSIZEY][2] = '0' + sharkStarveTime;
+    }
+    else if(biatch == 'W'){
+        oceanCopy[i][(j + OCEANSIZEX -1) % OCEANSIZEX][0] = SHARKY;
+        oceanCopy[i][(j + OCEANSIZEX -1) % OCEANSIZEX][1] = ocean[i][j][1];
+        oceanCopy[i][(j + OCEANSIZEX -1) % OCEANSIZEX][2] = '0' + sharkStarveTime;
+    }
+    oceanCopy[i][j][0] = ' ';// STOP HERE @@@@@@@@@@@@@
+    oceanCopy[i][j][1] = ' ';
+    oceanCopy[i][j][2] = ' ';
+    return biatch;
 }
 
 char checkNeighbourhoodShark(int i, int j){
     neighbourhoodFishForShark.clear();
     neighbourhoodEmptyForShark.clear();
-    if(ocean[(i + OCEANSIZEX -1) % OCEANSIZEX][j][0] == FISHY){
-        removeFish((i + OCEANSIZEX -1) % OCEANSIZEX,j);
-        return 'D';
+    if(ocean[(i + OCEANSIZEX -1) % OCEANSIZEX][j][0] == FISHY || oceanCopy[(i + OCEANSIZEX -1) % OCEANSIZEX][j][0] == FISHY){
+        neighbourhoodFishForShark.push_back('N');
     }
     else if(oceanCopy[(i + OCEANSIZEX -1) % OCEANSIZEX][j][0] == ' '){
         neighbourhoodEmptyForShark.push_back('N');
     }
-    if(ocean[(i + 1) % OCEANSIZEY][j][0] == FISHY){
-        removeFish((i + 1) % OCEANSIZEY, j);
-        return 'D';
+    if(ocean[(i + 1) % OCEANSIZEY][j][0] == FISHY || oceanCopy[(i + 1) % OCEANSIZEY][j][0] == FISHY){
+        neighbourhoodFishForShark.push_back('S');
     }
     else if(oceanCopy[(i + 1) % OCEANSIZEY][j][0] == ' '){
         neighbourhoodEmptyForShark.push_back('S');
     }
-    if(ocean[i][(j + 1) % OCEANSIZEY][0] == FISHY){
-        removeFish(i, (j + 1) % OCEANSIZEY);
-        return 'D';
+    if(ocean[i][(j + 1) % OCEANSIZEY][0] == FISHY || oceanCopy[i][(j + 1) % OCEANSIZEY][0] == FISHY){
+        neighbourhoodFishForShark.push_back('E');
     }
     else if(oceanCopy[i][(j + 1) % OCEANSIZEY][0] == ' '){
         neighbourhoodEmptyForShark.push_back('E');
     }
-    if(ocean[i][(j + OCEANSIZEX -1) % OCEANSIZEX][0] == FISHY){
-        removeFish(i, (j + OCEANSIZEX -1) % OCEANSIZEX);
-        return 'D';
+    if(ocean[i][(j + OCEANSIZEX -1) % OCEANSIZEX][0] == FISHY || oceanCopy[i][(j + OCEANSIZEX -1) % OCEANSIZEX][0] == FISHY){
+        neighbourhoodFishForShark.push_back('W');
     }
     else if(oceanCopy[i][(j + OCEANSIZEX -1) % OCEANSIZEX][0] == ' '){
         neighbourhoodEmptyForShark.push_back('W');
     }
     if(!neighbourhoodFishForShark.empty()){
-        return neighbourhoodFishForShark[(dice() + neighbourhoodFishForShark.size() -1) % neighbourhoodFishForShark.size()];
+        return eatFish(i, j, neighbourhoodFishForShark[(dice() + neighbourhoodFishForShark.size() -1) % neighbourhoodFishForShark.size()]);
     }
     else if(!neighbourhoodEmptyForShark.empty()){
-        int testDirectionTwo = (dice() + neighbourhoodEmptyForShark.size() -1) % neighbourhoodEmptyForShark.size();
-        return neighbourhoodEmptyForShark[testDirectionTwo];
+        return neighbourhoodEmptyForShark[(dice() + neighbourhoodEmptyForShark.size() -1) % neighbourhoodEmptyForShark.size()];
     }
     else{
         return 'D';
@@ -196,8 +221,7 @@ char checkNeighbourhoodFish(int i, int j){
         return 'D';
     }
     else {
-        int testDirectionTwo = (dice() + neighbourhood.size() -1) % neighbourhood.size();
-        return neighbourhood[testDirectionTwo];
+        return neighbourhood[(dice() + neighbourhood.size() -1) % neighbourhood.size()];
     }
 }
 
@@ -210,6 +234,9 @@ void moveCreature(int i, int j, int direction, char charDirection, int breedTime
         y = direction;
     }
     if (ocean[i][j][1] == '0') {
+        if(type == SHARKY){
+            oceanCopy[i][j][0] = type;
+        }
         oceanCopy[i][j][1] = '0' + breedTime;
         oceanCopy[i][j][2] = '0' + starveTime;
         oceanCopy[x][y][1] = '0' + breedTime;
@@ -220,6 +247,12 @@ void moveCreature(int i, int j, int direction, char charDirection, int breedTime
         oceanCopy[i][j][2] = ' ';
         oceanCopy[x][y][1] = ocean[i][j][1]; //copying instance of fish breed time to ocean copy's relative layer
         oceanCopy[x][y][2] = ocean[i][j][2];
+        ocean[i][j][0] = ' ';
+        ocean[i][j][1] = ' ';
+        ocean[i][j][2] = ' ';
+        ocean[x][y][0] = ' ';
+        ocean[x][y][1] = ' ';
+        ocean[x][y][2] = ' ';
     }
     oceanCopy[x][y][0] = type;
 }
@@ -228,7 +261,31 @@ void move() {
     char direction;
     for (int i = 0; i < OCEANSIZEX; ++i) {
         for (int j = 0; j < OCEANSIZEY; ++j) {
-            if (ocean[i][j][0] == FISHY) {
+            if (ocean[i][j][0] == SHARKY) {
+                direction = checkNeighbourhoodShark(i, j);
+                if (direction != 'D') {
+                    ocean[i][j][1]--;
+                    ocean[i][j][2]--;
+                    if (ocean[i][j][1] == '0') { //If Shark can Breed
+                        numShark++;
+                    }
+                }
+                if (ocean[i][j][2] == '0') { //If Shark has Starved
+                        removeShark(i, j);
+                }
+                else if (direction == 'N') {
+                    moveCreature(i, j, (i + OCEANSIZEX - 1) % OCEANSIZEX, 'N', sharkBreedTime, sharkStarveTime,
+                                     SHARKY);
+                } else if (direction == 'S') {
+                    moveCreature(i, j, (i + 1) % OCEANSIZEY, 'S', sharkBreedTime, sharkStarveTime, SHARKY);
+                } else if (direction == 'E') {
+                    moveCreature(i, j, (j + 1) % OCEANSIZEY, 'E', sharkBreedTime, sharkStarveTime, SHARKY);
+                } else if (direction == 'W') {
+                    moveCreature(i, j, (j + OCEANSIZEX - 1) % OCEANSIZEX, 'W', sharkBreedTime, sharkStarveTime,
+                                 SHARKY);
+                }
+            }
+            else if (ocean[i][j][0] == FISHY) {
                 direction = checkNeighbourhoodFish(i, j);
                 if (direction != 'D') {
                     ocean[i][j][1]--;
@@ -245,24 +302,6 @@ void move() {
                 } else if (direction == 'W') {
                     moveCreature(i, j, (j + OCEANSIZEX - 1) % OCEANSIZEX, 'W', fishBreedTime, 0, FISHY);
                 }
-            }else if (ocean[i][j][0] == SHARKY) {
-                direction = checkNeighbourhoodShark(i, j);
-                if (direction != 'D') {
-                    ocean[i][j][1]--;
-                    ocean[i][j][2]--;
-                }
-                if (ocean[i][j][2] == '0') {
-                    removeShark(i,j);
-                }
-                else if (direction == 'N') {
-                    moveCreature(i, j, (i + OCEANSIZEX - 1) % OCEANSIZEX, 'N', sharkBreedTime, sharkStarveTime, SHARKY);
-                } else if (direction == 'S') {
-                    moveCreature(i, j, (i + 1) % OCEANSIZEY, 'S', sharkBreedTime, sharkStarveTime, SHARKY);
-                } else if (direction == 'E') {
-                    moveCreature(i, j, (j + 1) % OCEANSIZEY, 'E', sharkBreedTime, sharkStarveTime, SHARKY);
-                } else if (direction == 'W') {
-                    moveCreature(i, j, (j + OCEANSIZEX - 1) % OCEANSIZEX, 'W', sharkBreedTime, sharkStarveTime, SHARKY);
-                }
             }
         }
     }
@@ -273,7 +312,7 @@ int main() {
     std::string display = "Test";
     sf::RenderWindow window(sf::VideoMode(1500, 1500), "SFML works!");
     sf::Font font;
-    font.loadFromFile("/Library/Fonts/AppleMyungjo.ttf" /*"/Applications/Microsoft Word.app/Contents/Resources/Fonts/Wingdings 2.ttf"*/);
+    font.loadFromFile("/Library/Fonts/AppleMyungjo.ttf");
     sf::Text text(display, font, 11);
     sf::Text numFishyWishy(std::to_string(numFish), font, 11);
     sf::Text numSharkyWarky(std::to_string(numShark), font, 11);
@@ -284,6 +323,15 @@ int main() {
     numSharkyWarky.setCharacterSize(40);
     numSharkyWarky.setPosition(0, 400);
     fillOcean();
+    display = displayOcean();
+    text.setString(display);
+    numFishyWishy.setString(std::to_string(numFish));
+    numSharkyWarky.setString(std::to_string(numShark));
+    window.clear();
+    window.draw(text);
+    window.draw(numFishyWishy);
+    window.draw(numSharkyWarky);
+    window.display();
     while (window.isOpen()) {
         sf::Event event;
         while (window.pollEvent(event)) {
@@ -295,8 +343,8 @@ int main() {
         numSharkyWarky.setString(std::to_string(numShark));
         window.clear();
         window.draw(text);
-        window.draw(numFishyWishy);
-        window.draw(numSharkyWarky);
+        //window.draw(numFishyWishy);
+        //window.draw(numSharkyWarky);
         window.display();
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
         move();
