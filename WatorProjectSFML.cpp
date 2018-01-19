@@ -12,15 +12,15 @@
 #include <boost/random.hpp>
 #include <boost/generator_iterator.hpp>
 
-int const OCEANSIZEX = 100;
-int const OCEANSIZEY = 100;
-int numFish = 500;
-int numShark = 40;
+int const OCEANSIZEX = 20;
+int const OCEANSIZEY = 20;
+int numFish = 200;
+int numShark = 50;
 char const FISHY = '.';
 char const SHARKY = '0';
-int fishBreedTime = 3;
-int sharkBreedTime = 3;
-int sharkStarveTime = 3;
+int fishBreedTime = 5;
+int sharkBreedTime = 5;
+int sharkStarveTime = 5;
 char ocean[OCEANSIZEX][OCEANSIZEY][3];
 char oceanCopy[OCEANSIZEX][OCEANSIZEY][3];
 int xPos, yPos;
@@ -105,23 +105,17 @@ void fillOcean() {
  */
 std::string displayOcean() {
     std::string temp;
+    numFish = 0;
+    numShark = 0;
     for (int i = 0; i < OCEANSIZEX; ++i) {
         for (int j = 0; j < OCEANSIZEY; ++j) {
+            if(ocean[i][j][0] == FISHY){
+                numFish++;
+            }
+            else if(ocean[i][j][0] == SHARKY){
+                numShark++;
+            }
             temp += ocean[i][j][DISPLAYLAYER];
-        }
-        temp += "\n";
-    }
-    temp += "\n\n";
-    for (int i = 0; i < OCEANSIZEX; ++i) {
-        for (int j = 0; j < OCEANSIZEY; ++j) {
-            temp += ocean[i][j][BREEDLAYER];
-        }
-        temp += "\n";
-    }
-    temp += "\n\n";
-    for (int i = 0; i < OCEANSIZEX; ++i) {
-        for (int j = 0; j < OCEANSIZEY; ++j) {
-            temp += ocean[i][j][STARVELAYER];
         }
         temp += "\n";
     }
@@ -135,34 +129,35 @@ void removeShark(int i, int j){
     oceanCopy[i][j][0] = ' ';
     oceanCopy[i][j][1] = ' ';
     oceanCopy[i][j][2] = ' ';
-    numShark--;
+    //numShark--;
 }
 
-char eatFish(int i, int j, char biatch){
-    if(biatch == 'N'){
+char eatFish(int i, int j, char direction){
+    if(direction == 'N'){
         oceanCopy[(i + OCEANSIZEX - 1) % OCEANSIZEX][j][0] = SHARKY;
         oceanCopy[(i + OCEANSIZEX - 1) % OCEANSIZEX][j][1] = ocean[i][j][1];
         oceanCopy[(i + OCEANSIZEX - 1) % OCEANSIZEX][j][2] = '0' + sharkStarveTime;
     }
-    else if(biatch == 'S') {
+    else if(direction == 'S') {
         oceanCopy[(i + 1) % OCEANSIZEY][j][0] = SHARKY;
         oceanCopy[(i + 1) % OCEANSIZEY][j][1] = ocean[i][j][1];
         oceanCopy[(i + 1) % OCEANSIZEY][j][2] = '0' + sharkStarveTime;
     }
-    else if(biatch == 'E'){
+    else if(direction == 'E'){
         oceanCopy[i][(j + 1) % OCEANSIZEY][0] = SHARKY;
         oceanCopy[i][(j + 1) % OCEANSIZEY][1] = ocean[i][j][1];
         oceanCopy[i][(j + 1) % OCEANSIZEY][2] = '0' + sharkStarveTime;
     }
-    else if(biatch == 'W'){
+    else if(direction == 'W'){
         oceanCopy[i][(j + OCEANSIZEX -1) % OCEANSIZEX][0] = SHARKY;
         oceanCopy[i][(j + OCEANSIZEX -1) % OCEANSIZEX][1] = ocean[i][j][1];
         oceanCopy[i][(j + OCEANSIZEX -1) % OCEANSIZEX][2] = '0' + sharkStarveTime;
     }
-    oceanCopy[i][j][0] = ' ';// STOP HERE @@@@@@@@@@@@@
+    oceanCopy[i][j][0] = ' ';
     oceanCopy[i][j][1] = ' ';
     oceanCopy[i][j][2] = ' ';
-    return biatch;
+    //numFish--;
+    return direction;
 }
 
 char checkNeighbourhoodShark(int i, int j){
@@ -267,7 +262,7 @@ void move() {
                     ocean[i][j][1]--;
                     ocean[i][j][2]--;
                     if (ocean[i][j][1] == '0') { //If Shark can Breed
-                        numShark++;
+                        //numShark++;
                     }
                 }
                 if (ocean[i][j][2] == '0') { //If Shark has Starved
@@ -290,7 +285,7 @@ void move() {
                 if (direction != 'D') {
                     ocean[i][j][1]--;
                     if (ocean[i][j][1] == '0') {
-                        numFish++;
+                        //numFish++;
                     }
                 }
                 if (direction == 'N') {
@@ -308,12 +303,13 @@ void move() {
     copyOcean(oceanCopy, ocean);
 }
 
+
 int main() {
     std::string display = "Test";
     sf::RenderWindow window(sf::VideoMode(1500, 1500), "SFML works!");
     sf::Font font;
     font.loadFromFile("/Library/Fonts/AppleMyungjo.ttf");
-    sf::Text text(display, font, 11);
+    sf::Text text(display, font, 2);
     sf::Text numFishyWishy(std::to_string(numFish), font, 11);
     sf::Text numSharkyWarky(std::to_string(numShark), font, 11);
     text.setCharacterSize(25);
@@ -323,14 +319,6 @@ int main() {
     numSharkyWarky.setCharacterSize(40);
     numSharkyWarky.setPosition(0, 400);
     fillOcean();
-    display = displayOcean();
-    text.setString(display);
-    numFishyWishy.setString(std::to_string(numFish));
-    numSharkyWarky.setString(std::to_string(numShark));
-    window.clear();
-    window.draw(text);
-    window.draw(numFishyWishy);
-    window.draw(numSharkyWarky);
     window.display();
     while (window.isOpen()) {
         sf::Event event;
@@ -339,14 +327,14 @@ int main() {
                 window.close();
         }
         text.setString(display);
-        numFishyWishy.setString(std::to_string(numFish));
-        numSharkyWarky.setString(std::to_string(numShark));
+        numFishyWishy.setString("\t\t\t\tNum Fish = " + std::to_string(numFish));
+        numSharkyWarky.setString("\t\t\t\tNum Shark = " + std::to_string(numShark));
         window.clear();
         window.draw(text);
-        //window.draw(numFishyWishy);
-        //window.draw(numSharkyWarky);
+        window.draw(numFishyWishy);
+        window.draw(numSharkyWarky);
         window.display();
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
         move();
         display = displayOcean();
     }
