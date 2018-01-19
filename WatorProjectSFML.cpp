@@ -1,10 +1,12 @@
-/** Copyright 2017 Karl Redmond, Ger Dobbs
- *ProducerConsumerMain.cpp
- *Author:   Karl Redmond, Ger Dobbs
- *Date:     Thursday,  27 November 2017.
- *License:  GNU General Public License v3.0
- *Brief:    Joint 4th Year Wator simulation Project
-**/
+/* Copyright 2017 Karl Redmond, Ger Dobbs
+ WatorProjectSFML.cpp
+ Author:   Karl Redmond, Ger Dobbs
+ Date:     Thursday,  27 November 2017.
+ License:  GNU General Public License v3.0
+ Brief:    Joint 4th Year Wator simulation Project. We implemented this project using two 3-dimensional arrays, 
+            the first of which (ocean[][][]) is used to display the current representaion of the denizens living in Wa-tor,
+            the second (oceanCopy[][][])is used to keep track of the moves for the current iteration. 
+*/
 
 #include <SFML/Graphics.hpp>
 #include <iostream>
@@ -21,11 +23,11 @@ char const SHARKY = '0';
 int fishBreedTime = 5;
 int sharkBreedTime = 5;
 int sharkStarveTime = 5;
-char ocean[OCEANSIZEX][OCEANSIZEY][3];
-char oceanCopy[OCEANSIZEX][OCEANSIZEY][3];
+char ocean[OCEANSIZEX][OCEANSIZEY][3]; /** Used for displaying ocean **/
+char oceanCopy[OCEANSIZEX][OCEANSIZEY][3]; /** Used for keeping track of moves**/
 int xPos, yPos;
-std::vector<char> neighbourhood;
-std::vector<char> neighbourhoodFishForShark;
+std::vector<char> neighbourhood;  
+std::vector<char> neighbourhoodFishForShark; 
 std::vector<char> neighbourhoodEmptyForShark;
 int const DISPLAYLAYER = 0;
 int const BREEDLAYER = 1;
@@ -36,7 +38,8 @@ boost::uniform_int<> one_to_six( 0, 20000 );
 boost::variate_generator< RNGType, boost::uniform_int<> > dice(rng, one_to_six);
 
 /**
- * \brief Initialize 3 Dimensional Cube. The first layer [0] represents what will be displayed.
+ * \brief Initialize 3 Dimensional Cube. 
+ * details The first layer [0] represents what will be displayed.
  * The second layer [1] represents the breed time for the fish and sharks that exist in layer [0].
  * The third layer[2] represents the starve time for the sharks that exist in layer[0].
  */
@@ -53,6 +56,12 @@ void initOceanCubes() {
     }
 }
 
+/**
+    *\brief This method copies any of the moves from the latest oceanCopy update, into the ocean. 
+    * \details This will be used to display
+    * the moves on screen. All layers of the cube are copied.
+    * param The oceanCopy Layer to be copied from and the ocean layer to be copied to
+**/
 void copyOcean(char copyFrom[OCEANSIZEX][OCEANSIZEY][3], char copyTo[OCEANSIZEX][OCEANSIZEY][3] ){
     for (int k = 0; k < OCEANSIZEX; ++k) {
         for (int i = 0; i < OCEANSIZEY; ++i) {
@@ -64,7 +73,8 @@ void copyOcean(char copyFrom[OCEANSIZEX][OCEANSIZEY][3], char copyTo[OCEANSIZEX]
 }
 
 /**
- * \brief Populate our cube with fish placed at random positions within the first layer,
+ * \brief Fill the ocean with fish.
+ * \details Populate our cube with fish placed at random positions within the first layer,
  * and set the corresponding second layer to the breed time of the fish.
  */
 void fillOceanCubeWithFish() {
@@ -77,9 +87,10 @@ void fillOceanCubeWithFish() {
 }
 
 /**
- * \brief Populate our cube with sharks placed at random positions within the first layer,
- * and set the corresponding second and third layer to the breed time of the shark, and the starve time of the shark respectively.
- */
+ * \brief Populate our cube with sharks.
+ * \details Put the sharks at random positions within the first layer,
+ *  and set the corresponding second and third layer to the breed time of the shark, and the starve time of the shark respectively.
+ **/
 void fillOceanCubeWithShark() {
     for (int i = 0; i < numShark; ++i) {
         xPos = dice() % OCEANSIZEX;
@@ -91,7 +102,9 @@ void fillOceanCubeWithShark() {
 }
 
 /**
- * \brief Initializes ocean with ' ' characters, subsequently populating the ocean with fish and sharks, and storing the breed/starve time.
+ * \brief Fill Ocean with sharks and fish.
+ * details First Initializes the ocean with ' ' characters, subsequently populating the ocean with fish and sharks,
+ * and storing the breed/starve time.This is then copied to oceanCopy.
  */
 void fillOcean() {
     initOceanCubes();
@@ -101,7 +114,8 @@ void fillOcean() {
 }
 
 /**
- * \brief Displays the first layer of the ocean, showing the positions of the fish and sharks.
+ * \brief Writes the string to be displayed, showing the positions of the fish and sharks. Also counts number of fish/sharks for
+ this iteration.
  */
 std::string displayOcean() {
     std::string temp;
@@ -122,6 +136,9 @@ std::string displayOcean() {
     return temp;
 }
 
+/**
+    \*brief If the shark has starved(sharkStarveTime == 0), this method removes the shark from both the copy and the main cube.
+**/
 void removeShark(int i, int j){
     ocean[i][j][0] = ' ';
     ocean[i][j][1] = ' ';
@@ -129,9 +146,11 @@ void removeShark(int i, int j){
     oceanCopy[i][j][0] = ' ';
     oceanCopy[i][j][1] = ' ';
     oceanCopy[i][j][2] = ' ';
-    //numShark--;
 }
 
+/**
+    Eats a fish in the given direction
+**/
 char eatFish(int i, int j, char direction){
     if(direction == 'N'){
         oceanCopy[(i + OCEANSIZEX - 1) % OCEANSIZEX][j][0] = SHARKY;
@@ -156,10 +175,13 @@ char eatFish(int i, int j, char direction){
     oceanCopy[i][j][0] = ' ';
     oceanCopy[i][j][1] = ' ';
     oceanCopy[i][j][2] = ' ';
-    //numFish--;
     return direction;
 }
 
+/**
+    Looks for empty space or fish in surrounding index positions. These positions are pushed onto a character vector, and later used to 
+    determine a random direction in which the shark should move.
+**/
 char checkNeighbourhoodShark(int i, int j){
     neighbourhoodFishForShark.clear();
     neighbourhoodEmptyForShark.clear();
@@ -197,7 +219,10 @@ char checkNeighbourhoodShark(int i, int j){
         return 'D';
     }
 }
-
+/**
+    Looks for empty space in surrounding index'. These positions are pushed onto a vector and later used to determine a random direction
+    in which the fish should move.
+**/
 char checkNeighbourhoodFish(int i, int j){
     neighbourhood.clear();
     if(oceanCopy[(i + OCEANSIZEX -1) % OCEANSIZEX][j][0] == ' '){
@@ -258,12 +283,9 @@ void move() {
         for (int j = 0; j < OCEANSIZEY; ++j) {
             if (ocean[i][j][0] == SHARKY) {
                 direction = checkNeighbourhoodShark(i, j);
-                if (direction != 'D') {
+                if (direction != 'D') { // If the shark can move(Not surrounded by sharks)
                     ocean[i][j][1]--;
                     ocean[i][j][2]--;
-                    if (ocean[i][j][1] == '0') { //If Shark can Breed
-                        //numShark++;
-                    }
                 }
                 if (ocean[i][j][2] == '0') { //If Shark has Starved
                         removeShark(i, j);
@@ -282,11 +304,8 @@ void move() {
             }
             else if (ocean[i][j][0] == FISHY) {
                 direction = checkNeighbourhoodFish(i, j);
-                if (direction != 'D') {
+                if (direction != 'D') { // If the fish can move (not surrounded by shark or fish)
                     ocean[i][j][1]--;
-                    if (ocean[i][j][1] == '0') {
-                        //numFish++;
-                    }
                 }
                 if (direction == 'N') {
                     moveCreature(i, j, (i + OCEANSIZEX - 1) % OCEANSIZEX, 'N', fishBreedTime, 0, FISHY);
