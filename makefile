@@ -21,7 +21,7 @@ SFML: ALL
 DEBUG: DEBUGFLAGS = -g -O0
 DEBUG: ALL
 
-doc:ALL
+doc: ALL
 	if [ -e "Doxyfile" ] ; then  rm 'Doxyfile';  fi
 	cp ~/Doxyfile .
 	if [ -d "docs" ] ; then  rm -rf 'docs';  fi
