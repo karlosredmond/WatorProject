@@ -6,7 +6,7 @@
 EXE = watorMainSFML
 CC = g++
 CFLAGS = -std=c++11 -pthread -I.
-CFILES = WatorProjectSFML.o
+CFILES = WatorProjectSFML.cpp
 
 #This rule says that each .o file depends on a .cpp file of the same name
 %.o: %.cpp
