@@ -34,4 +34,35 @@ Emacs environment was used for production.
 g++ compiler used with sfml libraries and flags.
 
 Documents produced utilizing Doxygen.
- 
+
+### How to run & dependencies
+
+This project requires that the sfml libraries are installed on the machine and that the sfml environment is setup.
+
+Assuming that your environment is setup correctly, the project can be run by using the following command in a bash terminal:
+         
+         make SFML
+         
+         ./watorMainSFML
+
+Documentation for the project can be produced using Doxegen as follows(assumes existing installation of Doxygen):
+          
+          make doc $L = "Whatever you want to call the project" $B = "Brief for your project"
+          
+The make doc command requires that a template Doxyfile exists on the root directory of your machine, the Doxyfile parameters for project name and project brief will be overwritten by $L and $B.
+
+### Benchmarking for sequential implementation
+
+The purpose of the benchmarking is to compare the speed of the each iteration against different grid sizes. The grid sizes used are 20 x 20, 40 x 40, 80 x 80, 160 x 160, 320 x 320. Data is collected for 10,000 iterations for each grid size. This produced the following data:
+
+	20x20	          40x40	          80x80	          160x160	          320x320
+Max	0.013842	          0.011893	          0.013627	          0.013534	          0.033594
+Std Dev +	0.007058205	0.006236237	0.007727532	0.010408402	0.030848818
+Average	0.000274411	0.000579474	0.001828064	0.007282804	0.028103637
+Std Dev -	0.00018856	0.000400241	0.00107	          0.003709932	0.013204447
+Min	0.000153	          0.000326	          0.000756	          0.00223	          0.007033
+
+A visual representation:
+
+
+
