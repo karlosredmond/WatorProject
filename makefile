@@ -1,6 +1,8 @@
-#Karl Redmond 03/10/2017
-#Makefile
-#Used to contain commands to compile project
+#Authors: 	Karl Redmond, Ger Dobbs
+#Date: 	  	03/10/2017
+#Brief: 	Wa-tor Simulation Project for 4th Year Software Development IT Carlow, Distributed & Concurrent Devices
+#File:		makefile
+#File Desc.:	Used to contain commands to compile project
 #added -I. to look for any header files with the same .cpp name
 
 EXE = watorMainSFML
@@ -20,7 +22,7 @@ SFML: ALL
 
 DEBUG: DEBUGFLAGS = -g -O0
 DEBUG: ALL
-
+#doc rule depends on Doxyfile template being stored in root directory
 doc: ALL
 	if [ -e "Doxyfile" ] ; then  rm 'Doxyfile';  fi
 	cp ~/Doxyfile .
