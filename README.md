@@ -55,9 +55,9 @@ The make doc command requires that a template Doxyfile exists on the root direct
 
 The purpose of the benchmarking is to compare the speed of the each iteration against different grid sizes. The grid sizes used are 20 x 20, 40 x 40, 80 x 80, 160 x 160, 320 x 320. Data is collected for 10,000 iterations for each grid size. This produced the following data:
 
-![alt text](https://raw.githubusercontent.com/GerKarl/WatorProject/edit/master/RawData.png)
+![alt text](https://raw.githubusercontent.com/GerKarl/WatorProject/master/RawData.png)
 
 A visual representation:
 
-![alt text](https://raw.githubusercontent.com/GerKarl/WatorProject/edit/master/SeqGraph.png)
+![alt text](https://raw.githubusercontent.com/GerKarl/WatorProject/master/SeqGraph.png)
 
