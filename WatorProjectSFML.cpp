@@ -3,9 +3,9 @@
  Author:   Karl Redmond, Ger Dobbs
  Date:     Thursday,  27 November 2017.
  License:  GNU General Public License v3.0
- Brief:    Joint 4th Year Wator simulation Project. We implemented this project using two 3-dimensional arrays, 
+ Brief:    Joint 4th Year Wator simulation Project. We implemented this project using two 3-dimensional arrays,
             the first of which (ocean[][][]) is used to display the current representaion of the denizens living in Wa-tor,
-            the second (oceanCopy[][][])is used to keep track of the moves for the current iteration. 
+            the second (oceanCopy[][][])is used to keep track of the moves for the current iteration.
 */
 
 #include <SFML/Graphics.hpp>
@@ -13,11 +13,14 @@
 #include <thread>
 #include <boost/random.hpp>
 #include <boost/generator_iterator.hpp>
+#include <fstream>
+#include <time.h>
 
-int const OCEANSIZEX = 20;
-int const OCEANSIZEY = 20;
-int numFish = 200;
-int numShark = 50;
+int count = 0; // for benchmarking
+int const OCEANSIZEX = 320;
+int const OCEANSIZEY = 320;
+int numFish = 3200;
+int numShark = 1600;
 char const FISHY = '.';
 char const SHARKY = '0';
 int fishBreedTime = 5;
@@ -26,8 +29,8 @@ int sharkStarveTime = 5;
 char ocean[OCEANSIZEX][OCEANSIZEY][3]; /** Used for displaying ocean **/
 char oceanCopy[OCEANSIZEX][OCEANSIZEY][3]; /** Used for keeping track of moves**/
 int xPos, yPos;
-std::vector<char> neighbourhood;  
-std::vector<char> neighbourhoodFishForShark; 
+std::vector<char> neighbourhood;
+std::vector<char> neighbourhoodFishForShark;
 std::vector<char> neighbourhoodEmptyForShark;
 int const DISPLAYLAYER = 0;
 int const BREEDLAYER = 1;
@@ -38,7 +41,7 @@ boost::uniform_int<> one_to_six( 0, 20000 );
 boost::variate_generator< RNGType, boost::uniform_int<> > dice(rng, one_to_six);
 
 /**
- * \brief Initialize 3 Dimensional Cube. 
+ * \brief Initialize 3 Dimensional Cube.
  * details The first layer [0] represents what will be displayed.
  * The second layer [1] represents the breed time for the fish and sharks that exist in layer [0].
  * The third layer[2] represents the starve time for the sharks that exist in layer[0].
@@ -57,7 +60,7 @@ void initOceanCubes() {
 }
 
 /**
-    *\brief This method copies any of the moves from the latest oceanCopy update, into the ocean. 
+    *\brief This method copies any of the moves from the latest oceanCopy update, into the ocean.
     * \details This will be used to display
     * the moves on screen. All layers of the cube are copied.
     * param The oceanCopy Layer to be copied from and the ocean layer to be copied to
@@ -179,7 +182,7 @@ char eatFish(int i, int j, char direction){
 }
 
 /**
-    Looks for empty space or fish in surrounding index positions. These positions are pushed onto a character vector, and later used to 
+    Looks for empty space or fish in surrounding index positions. These positions are pushed onto a character vector, and later used to
     determine a random direction in which the shark should move.
 **/
 char checkNeighbourhoodShark(int i, int j){
@@ -288,11 +291,11 @@ void move() {
                     ocean[i][j][2]--;
                 }
                 if (ocean[i][j][2] == '0') { //If Shark has Starved
-                        removeShark(i, j);
+                    removeShark(i, j);
                 }
                 else if (direction == 'N') {
                     moveCreature(i, j, (i + OCEANSIZEX - 1) % OCEANSIZEX, 'N', sharkBreedTime, sharkStarveTime,
-                                     SHARKY);
+                                 SHARKY);
                 } else if (direction == 'S') {
                     moveCreature(i, j, (i + 1) % OCEANSIZEY, 'S', sharkBreedTime, sharkStarveTime, SHARKY);
                 } else if (direction == 'E') {
@@ -339,23 +342,34 @@ int main() {
     numSharkyWarky.setPosition(0, 400);
     fillOcean();
     window.display();
-    while (window.isOpen()) {
-        sf::Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
-                window.close();
-        }
-        text.setString(display);
-        numFishyWishy.setString("\t\t\t\tNum Fish = " + std::to_string(numFish));
-        numSharkyWarky.setString("\t\t\t\tNum Shark = " + std::to_string(numShark));
-        window.clear();
-        window.draw(text);
-        window.draw(numFishyWishy);
-        window.draw(numSharkyWarky);
+    std::ofstream fileWrite;
+    fileWrite.open("timeTaken.csv");
         window.display();
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
-        move();
-        display = displayOcean();
-    }
+        std::clock_t start;
+        double timeTaken;
+        while (window.isOpen() && count < 10000) {
+            sf::Event event;
+            while (window.pollEvent(event)) {
+                if (event.type == sf::Event::Closed)
+                    window.close();
+            }
+            start = std::clock();
+            text.setString(display);
+            numFishyWishy.setString("\t\t\t\tNum Fish = " + std::to_string(numFish));
+            numSharkyWarky.setString("\t\t\t\tNum Shark = " + std::to_string(numShark));
+            window.clear();
+            window.draw(text);
+            window.draw(numFishyWishy);
+            window.draw(numSharkyWarky);
+            window.display();
+            //std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            move();
+            display = displayOcean();
+            count++;
+            timeTaken = ((std::clock() - start) / (double) CLOCKS_PER_SEC); // dividing start by CLOCKS_PER_SEC this gives the number of seconds
+            fileWrite << timeTaken << ",\n";
+        }
+
+    fileWrite.close();
     return 0;
 }
