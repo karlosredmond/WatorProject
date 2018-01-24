@@ -59,5 +59,5 @@ The purpose of the benchmarking is to compare the speed of the each iteration ag
 
 A visual representation:
 
-![alt text](https://raw.githubusercontent.com/GerKarl/WatorProject/master/SeqGraph.png)
+![alt text](https://raw.githubusercontent.com/GerKarl/WatorProject/master/SeqGraph2.png)
 
