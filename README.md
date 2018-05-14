@@ -61,3 +61,16 @@ A visual representation:
 
 ![alt text](https://raw.githubusercontent.com/GerKarl/WatorProject/master/SeqGraph2.png)
 
+### Benchmarking for concurrent implementation
+
+This part of the project would not work for us. We spent 8 hours trying to get it to work. The Virtual Machine gave errors involving OpenGL and would not run the SFML window.
+To get around this we used the MacOS which ran it no problem, however openMP would not work on the MacOs.
+
+We then tried booting ubuntu from a USB which worked fine, we installed SFML dependencies and were able to run the Wa-tor simulation with a single thread using:
+                    #pragma omp parallel for num_threads(1)
+This was put above our for loops and nested for loops and ran fine (with #include <omp.h>)
+
+The problem occurred when we increased the number of threads to any value above one. We kept getting floating point exceptions and could not figure out why. 
+
+Like I said, we spent about 8 hours trying to resolve this, alas, to no avail.
+
